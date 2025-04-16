@@ -2,8 +2,13 @@ ORG 0000H
 
 ; Vetor com os padrões possíveis dos LEDs
 ; Cada valor representa uma combinação dos 3 LEDs disponíveis (P1.0, P1.1, P1.2)
-PADS: DB 01H, 02H, 04H, 03H, 06H  ; Padrões possíveis (pré-definidos)
-SEQ:  DS 5                        ; Espaço para guardar sequência sorteada
+PADS: DB 20H, 40H, 80H, 60H, C0H 
+; 20H = P1.5
+; 40H = P1.6
+; 80H = P1.7
+; 60H = P1.5 + P1.6
+; C0H = P1.6 + P1.7
+SEQ:  DB 00H, 00H, 00H, 00H, 00H                     ; Espaço para guardar sequência sorteada
 
 ; Início
 START:
