@@ -36,25 +36,25 @@ OK_RANDOM:
 MOSTRAR_SEQUENCIA:
     MOV R2, #00H
 MOSTRAR_INTERNO:
-    MOV DPTR, #SEQ
-    MOV A, @DPTR[R2]
-    MOV P1, A
-    ACALL delay
-    MOV P1, #00H
-    ACALL delay
+    MOV DPTR, #SEQ      ; DPTR aponta para SEQ
+    MOV A, @DPTR[R2]    ; A = valor do padrão atual
+    MOV P1, A           ; Envia valor para os LEDs (porta P1)
+    ACALL delay         ; Mantém o LED aceso por um tempo
+    MOV P1, #00H        ; Apaga todos os LEDs
+    ACALL delay         ; Delay entre LEDs da sequência
 
-    INC R2
-    CJNE R2, R0, MOSTRAR_INTERNO
+    INC R2              ; Avança para o próximo da sequência
+    CJNE R2, R0, MOSTRAR_INTERNO ; Continua até exibir todos até R0
 
-    ACALL delay_maior
+    ACALL delay_maior   ; Delay maior entre cada rodada
 
-    INC R0
-    CJNE R0, #6, MOSTRAR_SEQUENCIA
+    INC R0              ; Avança para próxima rodada
+    CJNE R0, #6, MOSTRAR_SEQUENCIA ; Repete até exibir as 5 rodadas
 
 FIM:
-    SJMP $
+    SJMP $               ; Trava aqui após exibir a sequência completa
 
-; Delay padrão
+; Delay curto – utilizado entre LEDs
 delay:
     MOV R3, #200
 DL1: MOV R4, #200
