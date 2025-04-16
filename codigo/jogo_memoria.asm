@@ -1,1 +1,72 @@
+ORG 0000H
+
+; Vetor de padrões de LED
+PADS: DB 01H, 02H, 04H, 03H, 06H  ; Padrões possíveis (pré-definidos)
+SEQ:  DS 5                        ; Espaço para guardar sequência sorteada
+
+; Início
+START:
+    MOV DPTR, #PADS
+    MOV R0, #00H       ; Índice de preenchimento
+    MOV R7, #5         ; Total de rodadas
+
+GERAR_SEQUENCIA:
+    ; Gerar 5 padrões randômicos usando Timer 0
+    MOV TMOD, #01H     ; Timer0 modo 1
+    SETB TR0           ; Inicia Timer
+    ACALL delay
+    CLR TR0
+    MOV A, TL0
+    ANL A, #07H        ; Limita entre 0-7
+    CJNE A, #05H, OK_RANDOM
+    MOV A, #04H        ; Garante índice entre 0 e 4
+
+OK_RANDOM:
+    MOV R1, A
+    MOV DPTR, #PADS
+    MOVC A, @A+DPTR
+    MOV DPTR, #SEQ
+    MOV @DPTR[R0], A
+    INC R0
+    CJNE R0, #5, GERAR_SEQUENCIA
+
+    ; Exibir sequência progressiva
+    MOV R0, #00H   ; Posição da sequência
+MOSTRAR_SEQUENCIA:
+    MOV R2, #00H
+MOSTRAR_INTERNO:
+    MOV DPTR, #SEQ
+    MOV A, @DPTR[R2]
+    MOV P1, A
+    ACALL delay
+    MOV P1, #00H
+    ACALL delay
+
+    INC R2
+    CJNE R2, R0, MOSTRAR_INTERNO
+
+    ACALL delay_maior
+
+    INC R0
+    CJNE R0, #6, MOSTRAR_SEQUENCIA
+
+FIM:
+    SJMP $
+
+; Delay padrão
+delay:
+    MOV R3, #200
+DL1: MOV R4, #200
+DL2: DJNZ R4, DL2
+     DJNZ R3, DL1
+     RET
+
+; Delay maior para pausa entre rodadas
+delay_maior:
+    MOV R5, #255
+D1:  ACALL delay
+     DJNZ R5, D1
+     RET
+
+END
 
