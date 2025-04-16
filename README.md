@@ -1,5 +1,9 @@
 # Jogo da Memória com LEDs – Projeto de arquitetura de computadores
 
+##  Desenvolvido por
+
+Henrique Bassan – 22.223.083-1
+
 ##  Descrição do Projeto
 
 Este projeto consiste em um **jogo da memória desenvolvido no simulador edSim51**, utilizando os periféricos disponíveis como LEDs, visor de 7 segmentos e teclado matricial.
@@ -17,17 +21,14 @@ O objetivo é desafiar o usuário a repetir uma sequência de LEDs que piscaram 
   - A palavra **"ERRO"** aparece no display de 7 segmentos.
   - O jogo reinicia ou aguarda nova tentativa.
 
-## Periféricos Utilizados
+## Funções que serão usadas no edsim
 
 - **Porta P1:** Controle dos LEDs (saída).
 - **Teclado matricial:** Entrada do usuário (leitura via P3).
 - **Display de 7 segmentos:** Exibição da palavra "ERRO" em caso de falha.
-- 
+  
 ##  Entregas
 
 -  Entrega parcial: implementação da sequência fixa de LEDs piscando.
 -  Próxima etapa: leitura do teclado e verificação da resposta.
 
-##  Desenvolvido por
-
-Henrique Bassan – 22.223.083-1
