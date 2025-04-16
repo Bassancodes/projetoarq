@@ -1,12 +1,13 @@
 ORG 0000H
 
-; Vetor de padrões de LED
+; Vetor com os padrões possíveis dos LEDs
+; Cada valor representa uma combinação dos 3 LEDs disponíveis (P1.0, P1.1, P1.2)
 PADS: DB 01H, 02H, 04H, 03H, 06H  ; Padrões possíveis (pré-definidos)
 SEQ:  DS 5                        ; Espaço para guardar sequência sorteada
 
 ; Início
 START:
-    MOV DPTR, #PADS
+    MOV DPTR, #PADS    ; Ponteiro para acessar os padrões
     MOV R0, #00H       ; Índice de preenchimento
     MOV R7, #5         ; Total de rodadas
 
