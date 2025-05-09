@@ -119,4 +119,35 @@ PEQUENO_DELAY:
 PD1: DJNZ R1, PD1
     RET
 
+LER_TECLA:
+  
+AGUARDA:
+    MOV A, #0F7H      
+    ANL P3, A
+    MOV A, P3
+    ANL A, #0F0H        
+    CJNE A, #0E0H, CHECA_1
+    MOV A, #00          
+    RET
+
+CHECA_1:
+    MOV A, #0FEH        
+    ANL P3, A
+    MOV A, P3
+    ANL A, #0F0H
+    CJNE A, #0E0H, CHECA_2
+    MOV A, #01         
+    RET
+
+CHECA_2:
+    MOV A, #0FEH        ; Linha 0 ainda (tecla 2 está nela)
+    ANL P3, A
+    MOV A, P3
+    ANL A, #0F0H
+    CJNE A, #0D0H, AGUARDA
+    MOV A, #02          ; Tecla '2'
+    RET
+
+
+
 END
