@@ -1,78 +1,122 @@
 ORG 0000H
 
-; Vetor com os padrões possíveis dos LEDs
-; Cada valor representa uma combinação dos 3 LEDs disponíveis (P1.0, P1.1, P1.2)
-PADS: DB 20H, 40H, 80H, 60H, C0H 
-; 20H = P1.5
-; 40H = P1.6
-; 80H = P1.7
-; 60H = P1.5 + P1.6
-; C0H = P1.6 + P1.7
-SEQ:  DB 00H, 00H, 00H, 00H, 00H                     ; Espaço para guardar sequência sorteada
+INICIO:
+    ACALL INICIALIZAR_LCD
+    MOV R7, #0   ; semente do "random"
 
-; Início
-START:
-    MOV DPTR, #PADS    ; Ponteiro para acessar os padrões
-    MOV R0, #00H       ; Índice de preenchimento
-    MOV R7, #5         ; Total de rodadas
+LOOP_JOGO:
+    ; Gera número pseudoaleatório entre 0 e 2
+    INC R7
+    MOV A, R7
+    ANL A, #03H   ; limita entre 0~3
+    CJNE A, #03, OK
+    MOV A, #2     ; se for 3, vira 2
+OK:
+    ; Limpa LEDs
+    CLR P1.0
+    CLR P1.1
+    CLR P1.2
 
-GERAR_SEQUENCIA:
-    ; Gerar 5 padrões randômicos usando Timer 0
-    MOV TMOD, #01H     ; Timer0 modo 1
-    SETB TR0           ; Inicia Timer
-    ACALL delay
-    CLR TR0
-    MOV A, TL0
-    ANL A, #07H        ; Limita entre 0-7
-    CJNE A, #05H, OK_RANDOM
-    MOV A, #04H        ; Garante índice entre 0 e 4
+    ; Liga o LED correspondente
+    CJNE A, #0, CHECA1
+    SETB P1.0
+    SJMP MOSTRAR
+CHECA1:
+    CJNE A, #1, CHECA2
+    SETB P1.1
+    SJMP MOSTRAR
+CHECA2:
+    SETB P1.2
 
-OK_RANDOM:
-    MOV R1, A
-    MOV DPTR, #PADS
-    MOVC A, @A+DPTR
-    MOV DPTR, #SEQ
-    MOV @DPTR[R0], A
-    INC R0
-    CJNE R0, #5, GERAR_SEQUENCIA
+MOSTRAR:
+    ACALL DELAY_LED
 
-    ; Exibir sequência progressiva
-    MOV R0, #00H   ; Posição da sequência
-MOSTRAR_SEQUENCIA:
-    MOV R2, #00H
-MOSTRAR_INTERNO:
-    MOV DPTR, #SEQ      ; DPTR aponta para SEQ
-    MOV A, @DPTR[R2]    ; A = valor do padrão atual
-    MOV P1, A           ; Envia valor para os LEDs (porta P1)
-    ACALL delay         ; Mantém o LED aceso por um tempo
-    MOV P1, #00H        ; Apaga todos os LEDs
-    ACALL delay         ; Delay entre LEDs da sequência
+    ; Apaga o LED
+    CLR P1.0
+    CLR P1.1
+    CLR P1.2
+    ACALL DELAY_LED
 
-    INC R2              ; Avança para o próximo da sequência
-    CJNE R2, R0, MOSTRAR_INTERNO ; Continua até exibir todos até R0
+    ; Exibe "ERRO"
+    MOV A, #01H
+    ACALL COMANDO_LCD
+    MOV A, #'E'
+    ACALL ESCREVER_LCD
+    MOV A, #'R'
+    ACALL ESCREVER_LCD
+    MOV A, #'R'
+    ACALL ESCREVER_LCD
+    MOV A, #'O'
+    ACALL ESCREVER_LCD
 
-    ACALL delay_maior   ; Delay maior entre cada rodada
+    SJMP LOOP_JOGO
 
-    INC R0              ; Avança para próxima rodada
-    CJNE R0, #6, MOSTRAR_SEQUENCIA ; Repete até exibir as 5 rodadas
+; ---------- LCD e DELAYS ----------
 
-FIM:
-    SJMP $               ; Trava aqui após exibir a sequência completa
+INICIALIZAR_LCD:
+    ACALL DELAY_15MS
+    MOV A, #028H
+    ACALL COMANDO_LCD
+    MOV A, #0CH
+    ACALL COMANDO_LCD
+    MOV A, #01H
+    ACALL COMANDO_LCD
+    MOV A, #06H
+    ACALL COMANDO_LCD
+    RET
 
-; Delay curto – utilizado entre LEDs
-delay:
-    MOV R3, #200
-DL1: MOV R4, #200
-DL2: DJNZ R4, DL2
-     DJNZ R3, DL1
-     RET
+COMANDO_LCD:
+    CLR P3.5
+    CLR P3.4
+    ACALL ENVIAR_4BITS
+    RET
 
-; Delay maior para pausa entre rodadas
-delay_maior:
-    MOV R5, #255
-D1:  ACALL delay
-     DJNZ R5, D1
-     RET
+ESCREVER_LCD:
+    SETB P3.5
+    CLR P3.4
+    ACALL ENVIAR_4BITS
+    RET
+
+ENVIAR_4BITS:
+    MOV R0, A
+    ANL A, #0F0H
+    MOV P1, A
+    SETB P3.6
+    ACALL PEQUENO_DELAY
+    CLR P3.6
+    ACALL PEQUENO_DELAY
+
+    MOV A, R0
+    SWAP A
+    ANL A, #0F0H
+    MOV P1, A
+    SETB P3.6
+    ACALL PEQUENO_DELAY
+    CLR P3.6
+    ACALL PEQUENO_DELAY
+    RET
+
+DELAY_LED:
+    MOV R2, #2
+DL2: MOV R1, #255
+DL1: MOV R0, #255
+DL0: DJNZ R0, DL0
+    DJNZ R1, DL1
+    DJNZ R2, DL2
+    RET
+
+DELAY_15MS:
+    MOV R2, #5
+D15_2: MOV R1, #255
+D15_1: MOV R0, #255
+D15_0: DJNZ R0, D15_0
+    DJNZ R1, D15_1
+    DJNZ R2, D15_2
+    RET
+
+PEQUENO_DELAY:
+    MOV R1, #30
+PD1: DJNZ R1, PD1
+    RET
 
 END
-
